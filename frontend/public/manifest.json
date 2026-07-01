@@ -1,0 +1,17 @@
+{
+  "short_name": "Unidos",
+  "name": "Unidos - Red Comunitaria de Emergencias",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#020617",
+  "display": "standalone",
+  "theme_color": "#020617",
+  "description": "Red comunitaria de emergencias y ayuda humanitaria.",
+  "orientation": "portrait-primary"
+}
