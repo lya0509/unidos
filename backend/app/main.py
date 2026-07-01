@@ -53,7 +53,7 @@ async def cleanup_db_loop():
             db.client.table("solicitudes_sos").delete().lte("created_at", six_hours_ago).execute()
             
             # Borrar SOS resueltos o cancelados
-            db.client.table("solicitudes_sos").delete().in_("estado", ["resuelta", "cancelada"]).execute()
+            db.client.table("solicitudes_sos").delete().in_("estado", ["entregada", "cancelada"]).execute()
             
             # Borrar mensajes del chat global con más de 3 días
             db.client.table("mensajes_chat").delete().eq("room_id", "global_chat").lte("created_at", three_days_ago).execute()

@@ -86,11 +86,11 @@ def resolve_sos(sos_id: str, user_id: str = Depends(get_current_user_id)):
         raise HTTPException(status_code=403, detail="No tienes permiso para resolver esta alerta")
         
     # 2. Actualizar estado
-    res = db.client.table("solicitudes_sos").update({"estado": "resuelta"}).eq("id", sos_id).execute()
+    res = db.client.table("solicitudes_sos").update({"estado": "entregada"}).eq("id", sos_id).execute()
     if not res.data:
         raise HTTPException(status_code=500, detail="Error al actualizar alerta")
         
-    return {"mensaje": "Alerta marcada como resuelta exitosamente"}
+    return {"mensaje": "Alerta marcada como entregada exitosamente"}
 
 @router.put("/editar/{sos_id}", tags=["SOS"])
 def edit_sos(sos_id: str, body: SOSEdit, user_id: str = Depends(get_current_user_id)):
