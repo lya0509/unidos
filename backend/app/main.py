@@ -145,10 +145,10 @@ async def cache_middleware(request: Request, call_next):
 # ==========================================
 # 5. ENDPOINTS BASE Y HEALTHCHECK
 # ==========================================
-@app.get("/health", tags=["Sistema"])
-@limiter.limit("5/minute")
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["Sistema"])
+@limiter.limit("30/minute")
 async def health_check(request: Request):
-    """Mantiene el backend despierto (CronJob)."""
+    """Mantiene el backend despierto (CronJob / UptimeRobot)."""
     return {"status": "ok", "timestamp": time.time()}
 
 # Incluir routers
