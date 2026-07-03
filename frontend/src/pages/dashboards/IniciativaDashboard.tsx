@@ -30,6 +30,20 @@ export function IniciativaDashboard() {
   const [manualCantidad, setManualCantidad] = useState(1)
   const [inventorySuccess, setInventorySuccess] = useState('')
 
+  // Inventario Privacidad State
+  const [publicarInventario, setPublicarInventario] = useState(user?.publicar_inventario !== false)
+
+  const handleTogglePublicarInventario = async () => {
+    try {
+      const newVal = !publicarInventario
+      await api.put('/auth/me/privacidad-inventario', { publicar: newVal })
+      setPublicarInventario(newVal)
+      alert(`Tu inventario ahora es ${newVal ? 'PÚBLICO (visible en el directorio)' : 'PRIVADO (oculto del directorio)'}.`)
+    } catch (err: any) {
+      alert('Error al actualizar la visibilidad del inventario.')
+    }
+  }
+
   const fetchSos = async () => {
     try {
       const res = await api.get(`/sos/feed?zona=${user?.zona_operacion || ''}`)
@@ -365,11 +379,26 @@ export function IniciativaDashboard() {
       {/* INVENTORY TAB */}
       {activeTab === 'inventory' && (
         <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-1 flex items-center gap-2">
-              <Package className="w-5 h-5 text-yellow-600 dark:text-yellow-400" /> Mi Inventario
-            </h2>
-            <p className="text-yellow-600/80 dark:text-yellow-400/70 text-xs font-bold uppercase tracking-widest">Control de materias primas</p>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider mb-1 flex items-center gap-2">
+                <Package className="w-5 h-5 text-yellow-600 dark:text-yellow-400" /> Mi Inventario
+              </h2>
+              <p className="text-yellow-600/80 dark:text-yellow-400/70 text-xs font-bold uppercase tracking-widest">Control de materias primas</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Visibilidad:</span>
+              <button
+                onClick={handleTogglePublicarInventario}
+                className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all active:scale-95 border ${
+                  publicarInventario
+                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/20'
+                    : 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20'
+                }`}
+              >
+                {publicarInventario ? '🔓 Público' : '🔒 Privado'}
+              </button>
+            </div>
           </div>
 
           <div className="glass-panel rounded-xl shadow-inner border border-slate-300 dark:border-slate-700/50">

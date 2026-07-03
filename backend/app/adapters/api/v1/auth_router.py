@@ -151,6 +151,11 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Token inválido o expirado")
     return payload
 
+from pydantic import BaseModel
+
+class ToggleInventarioRequest(BaseModel):
+    publicar: bool
+
 @router.delete('/me', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(current_user: dict = Depends(get_current_user)):
     try:
@@ -159,11 +164,21 @@ def delete_user(current_user: dict = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=500, detail='Error eliminando cuenta')
 
+@router.put('/me/privacidad-inventario')
+def toggle_privacidad_inventario(req: ToggleInventarioRequest, current_user: dict = Depends(get_current_user)):
+    try:
+        db.client.table('usuarios').update({
+            'publicar_inventario': req.publicar
+        }).eq('id', current_user['id']).execute()
+        return {"mensaje": "Visibilidad del inventario actualizada.", "publicar": req.publicar}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get('/directorio', tags=['Directorio'])
 def get_directorio(zona: str = ''):
     try:
         roles = ['centro_acopio', 'clinica', 'comunidad', 'refugio', 'lider_vecinal', 'iniciativa_ciudadana']
-        query = db.client.table('usuarios').select('id, nombre, email, rol, zona_operacion, telefono, foto_cedula_url, foto_rostro_url').in_('rol', roles)
+        query = db.client.table('usuarios').select('id, nombre, email, rol, zona_operacion, telefono, foto_cedula_url, foto_rostro_url, publicar_inventario').in_('rol', roles)
         if zona and zona != 'Nacional' and zona != 'TODA VENEZUELA':
             query = query.ilike('zona_operacion', f'%{zona}%')
         res = query.execute()
@@ -181,7 +196,11 @@ def get_directorio(zona: str = ''):
             inv_map[uid].append({'insumo': item['insumo'], 'cantidad': item['cantidad']})
             
         for u in res.data:
-            u['inventario'] = inv_map.get(u['id'], [])
+            # Si publicar_inventario es False, ocultamos su inventario al público
+            if u.get('publicar_inventario', True):
+                u['inventario'] = inv_map.get(u['id'], [])
+            else:
+                u['inventario'] = []
         return res.data
     except Exception as e:
         print('Error en directorio:', e)

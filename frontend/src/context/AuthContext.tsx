@@ -9,6 +9,7 @@ interface User {
   zona_operacion?: string
   verificado: boolean
   foto_rostro_url?: string
+  publicar_inventario?: boolean
 }
 
 interface AuthContextType {

@@ -44,6 +44,20 @@ export const CentroDashboard = () => {
   const { theme, toggleTheme } = useTheme()
   const [lowDataMode, setLowDataMode] = useState(false)
 
+  // Inventario Privacidad State
+  const [publicarInventario, setPublicarInventario] = useState(user?.publicar_inventario !== false)
+
+  const handleTogglePublicarInventario = async () => {
+    try {
+      const newVal = !publicarInventario
+      await api.put('/auth/me/privacidad-inventario', { publicar: newVal })
+      setPublicarInventario(newVal)
+      alert(`Tu inventario ahora es ${newVal ? 'PÚBLICO (visible en el directorio)' : 'PRIVADO (oculto del directorio)'}.`)
+    } catch (err: any) {
+      alert('Error al actualizar la visibilidad del inventario.')
+    }
+  }
+
   // Convocatoria Form State
   const [convForm, setConvForm] = useState({ titulo: '', descripcion: '', instrucciones: '', limite_personas: 50 })
   const [convCreating, setConvCreating] = useState(false)
@@ -568,9 +582,24 @@ export const CentroDashboard = () => {
             )}
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-blue-200 dark:border-blue-500/30 shadow-2xl p-6">
-                <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6 flex items-center gap-3 uppercase tracking-wider">
-                    <Activity className="w-6 h-6 text-blue-500 dark:text-blue-400" /> Mi Inventario
-                </h2>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 border-b border-slate-100 dark:border-slate-800/50 pb-4">
+                    <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3 uppercase tracking-wider">
+                        <Activity className="w-6 h-6 text-blue-500 dark:text-blue-400" /> Mi Inventario
+                    </h2>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Visibilidad:</span>
+                        <button
+                            onClick={handleTogglePublicarInventario}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all active:scale-95 border ${
+                                publicarInventario
+                                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/20'
+                                    : 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500/20'
+                            }`}
+                        >
+                            {publicarInventario ? '🔓 Público' : '🔒 Privado'}
+                        </button>
+                    </div>
+                </div>
 
                 <InventoryAutocomplete 
                    onAdd={handleAddInventory}
