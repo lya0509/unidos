@@ -144,3 +144,26 @@ button[class*="bg-slate-900"] {
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* AMOLED mode styling for Leaflet Maps */
+.battery-saver .leaflet-container {
+  background: #000000 !important;
+}
+.battery-saver .leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg) brightness(0.65) contrast(1.4) !important;
+}
+.battery-saver .leaflet-bar,
+.battery-saver .leaflet-control,
+.battery-saver .leaflet-control-zoom {
+  border: 1px solid #444444 !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+.battery-saver .leaflet-popup-content-wrapper,
+.battery-saver .leaflet-popup-tip {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #444444 !important;
+  box-shadow: none !important;
+}

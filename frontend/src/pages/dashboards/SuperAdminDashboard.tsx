@@ -9,6 +9,7 @@ import { PostModerationPanel } from '../../components/PostModerationPanel';
 import { UserManagementPanel } from '../../components/UserManagementPanel';
 import { FallasManagementPanel } from '../../components/FallasManagementPanel';
 import { ConvocatoriasAdminPanel } from '../../components/ConvocatoriasAdminPanel';
+import { RadarMap } from '../../components/RadarMap';
 import { AuthContext, useAuth } from '../../context/AuthContext';
 import { ShieldAlert, LogOut } from 'lucide-react';
 
@@ -43,6 +44,15 @@ export const SuperAdminDashboard = () => {
        case 'usuarios_db': return <UserManagementPanel />;
        case 'fallas_db': return <FallasManagementPanel />;
        case 'convocatorias_db': return <ConvocatoriasAdminPanel />;
+       case 'mapa_radar': return (
+         <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 space-y-4">
+           <div>
+             <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">🗺️ Mapa de Radar Comunitario</h2>
+             <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Monitoreo general en tiempo real de alertas SOS y Centros de Apoyo.</p>
+           </div>
+           <RadarMap filtroZona="Nacional" />
+         </div>
+       );
        default: return null;
     }
   };
@@ -76,7 +86,8 @@ export const SuperAdminDashboard = () => {
              { id: 'moderacion', label: 'Moderación de Muro' },
              { id: 'usuarios_db', label: '👥 Gestión de Usuarios (Real)' },
              { id: 'fallas_db', label: '🛠️ Reportes de Fallas' },
-             { id: 'convocatorias_db', label: '📋 Convocatorias' }
+             { id: 'convocatorias_db', label: '📋 Convocatorias' },
+             { id: 'mapa_radar', label: '🗺️ Mapa de Radar' }
           ].map(r => (
             <button 
                key={r.id}

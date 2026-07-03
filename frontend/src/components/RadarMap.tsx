@@ -120,11 +120,46 @@ const getRoleHex = (tipo: string) => {
   }
 };
 
+// Coordenadas fijas para centrado de estados de Venezuela
+const ZONA_COORDINATES: Record<string, [number, number]> = {
+  'nacional': [10.4806, -66.9036],
+  'toda venezuela': [10.4806, -66.9036],
+  'caracas': [10.4806, -66.9036],
+  'distrito capital': [10.4806, -66.9036],
+  'miranda': [10.2372, -66.3534],
+  'la guaira': [10.5985, -66.9463],
+  'vargas': [10.5985, -66.9463],
+  'aragua': [10.2354, -67.5911],
+  'carabobo': [10.1650, -68.0009],
+  'zulia': [10.6427, -71.6131],
+  'lara': [10.0678, -69.3474],
+  'anzoátegui': [9.3243, -64.4883],
+  'anzoategui': [9.3243, -64.4883],
+  'bolívar': [8.1215, -63.5413],
+  'bolivar': [8.1215, -63.5413],
+  'táchira': [7.7663, -72.2235],
+  'tachira': [7.7663, -72.2235],
+  'mérida': [8.5983, -71.1446],
+  'merida': [8.5983, -71.1446],
+  'falcón': [11.4116, -69.6738],
+  'falcon': [11.4116, -69.6738],
+  'sucre': [10.4533, -63.7663],
+  'monagas': [9.7423, -63.1764],
+  'barinas': [8.6226, -70.2076],
+  'apure': [7.8891, -67.4724],
+  'guárico': [8.9189, -66.8994],
+  'guarico': [8.9189, -66.8994],
+  'cojedes': [9.6548, -68.5878],
+  'portuguesa': [9.0556, -69.2556],
+  'yaracuy': [10.2974, -68.7391],
+  'nueva esparta': [10.9971, -63.9113],
+};
+
 // Component to recenter map
 const MapUpdater = ({ center }: { center: [number, number] }) => {
   const map = useMap();
   useEffect(() => {
-    map.flyTo(center, map.getZoom(), { animate: true, duration: 1.5 });
+    map.setView(center, map.getZoom(), { animate: true });
   }, [center, map]);
   return null;
 }
@@ -161,9 +196,35 @@ export const RadarMap: React.FC<RadarMapProps> = ({ filtroZona, centros = [] }) 
     }
   };
   
-  const tileUrl = theme === 'dark' 
+  const isDark = theme === 'dark' || theme === 'battery-saver';
+  const tileUrl = isDark 
     ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
     : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
+  // Centrar automáticamente cuando cambia el filtro de zona
+  useEffect(() => {
+    if (filtroZona) {
+      if (filtroZona.includes('||')) {
+        const parts = filtroZona.split('||');
+        const lat = parseFloat(parts[1]);
+        const lng = parseFloat(parts[2]);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setMapCenter([lat, lng]);
+          return;
+        }
+      }
+      
+      const clean = filtroZona.trim().toLowerCase();
+      if (ZONA_COORDINATES[clean]) {
+        setMapCenter(ZONA_COORDINATES[clean]);
+      } else {
+        const match = Object.keys(ZONA_COORDINATES).find(k => clean.includes(k) || k.includes(clean));
+        if (match) {
+          setMapCenter(ZONA_COORDINATES[match]);
+        }
+      }
+    }
+  }, [filtroZona]);
     
   useEffect(() => {
     const fetchData = async () => {
