@@ -55,7 +55,8 @@ export const PostModerationPanel: React.FC = () => {
 
   const filteredPosts = posts.filter(post => {
     if (filtroEstado === 'baneados') return post.baneado === true;
-    if (filtroEstado === 'activos') return post.baneado === false;
+    if (filtroEstado === 'activos') return post.baneado === false && (!post.cantidad_reportes || post.cantidad_reportes === 0);
+    if (filtroEstado === 'precaucion') return post.baneado === false && post.cantidad_reportes > 0 && post.cantidad_reportes < 25;
     return true;
   });
 
@@ -88,11 +89,12 @@ export const PostModerationPanel: React.FC = () => {
       </div>
 
       {/* FILTROS DE ESTADO */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {[
           { id: 'todos', label: 'Ver Todas' },
-          { id: 'baneados', label: 'Baneadas (5+ Banderas)' },
-          { id: 'activos', label: 'Activas' }
+          { id: 'activos', label: 'Activas (Sin Reportes)' },
+          { id: 'precaucion', label: '⚠️ Precaución (1-24 Banderas)' },
+          { id: 'baneados', label: '🚫 Baneadas (25 Banderas)' }
         ].map(opt => (
           <button
             key={opt.id}
