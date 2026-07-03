@@ -16,7 +16,7 @@ export const Register: React.FC<RegisterProps> = ({ onNavigateToLogin, onNavigat
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [contrasena, setContrasena] = useState('')
-  const [rol, setRol] = useState('comunidad')
+  const [rol, setRol] = useState('')
   const [zona, setZona] = useState('Ciudad Casarapa')
 
   const [error, setError] = useState('')
@@ -57,6 +57,12 @@ export const Register: React.FC<RegisterProps> = ({ onNavigateToLogin, onNavigat
     e.preventDefault()
     setError('')
     setSuccess('')
+    
+    if (!rol) {
+      setError('Debes seleccionar un rol para tu alistamiento.')
+      return
+    }
+
     setLoading(true)
     try {
       await register(nombre, email, contrasena, rol, zona, null, null, null)
@@ -186,11 +192,13 @@ export const Register: React.FC<RegisterProps> = ({ onNavigateToLogin, onNavigat
                 <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-blue-600 dark:text-blue-500 pointer-events-none z-10">
                   <Shield className="w-5 h-5" />
                 </span>
-                <select
+                 <select
+                    required
                     value={rol}
                     onChange={(e) => setRol(e.target.value)}
                     className="w-full pl-12 pr-10 py-3.5 bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 text-sm font-bold text-slate-900 dark:text-white transition-all uppercase tracking-wider appearance-none cursor-pointer"
                   >
+                    <option value="" disabled hidden>Selecciona tu rol</option>
                     <option value="comunidad">🏘️ Comunidad (Centro Temporal)</option>
                     <option value="refugio">⛺ Refugio / Campamento</option>
                     <option value="lider_vecinal">👤 Líder Vecinal</option>
