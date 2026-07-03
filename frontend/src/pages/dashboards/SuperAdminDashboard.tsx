@@ -8,6 +8,7 @@ import { IdentityAuditPanel } from './IdentityAuditPanel';
 import { PostModerationPanel } from '../../components/PostModerationPanel';
 import { UserManagementPanel } from '../../components/UserManagementPanel';
 import { FallasManagementPanel } from '../../components/FallasManagementPanel';
+import { ConvocatoriasAdminPanel } from '../../components/ConvocatoriasAdminPanel';
 import { AuthContext, useAuth } from '../../context/AuthContext';
 import { ShieldAlert, LogOut } from 'lucide-react';
 
@@ -41,6 +42,7 @@ export const SuperAdminDashboard = () => {
        case 'moderacion': return <PostModerationPanel />;
        case 'usuarios_db': return <UserManagementPanel />;
        case 'fallas_db': return <FallasManagementPanel />;
+       case 'convocatorias_db': return <ConvocatoriasAdminPanel />;
        default: return null;
     }
   };
@@ -73,7 +75,8 @@ export const SuperAdminDashboard = () => {
              { id: 'auditoria', label: 'Auditoría de Identidades' },
              { id: 'moderacion', label: 'Moderación de Muro' },
              { id: 'usuarios_db', label: '👥 Gestión de Usuarios (Real)' },
-             { id: 'fallas_db', label: '🛠️ Reportes de Fallas' }
+             { id: 'fallas_db', label: '🛠️ Reportes de Fallas' },
+             { id: 'convocatorias_db', label: '📋 Convocatorias' }
           ].map(r => (
             <button 
                key={r.id}

@@ -44,6 +44,34 @@ export const CentroDashboard = () => {
   const { theme, toggleTheme } = useTheme()
   const [lowDataMode, setLowDataMode] = useState(false)
 
+  // Convocatoria Form State
+  const [convForm, setConvForm] = useState({ titulo: '', descripcion: '', instrucciones: '', limite_personas: 50 })
+  const [convCreating, setConvCreating] = useState(false)
+
+  const handleCreateConvocatoria = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!convForm.titulo.trim() || !convForm.descripcion.trim()) {
+      alert('El título y la descripción son obligatorios.')
+      return
+    }
+    setConvCreating(true)
+    try {
+      await api.post('/convocatorias', {
+        titulo: convForm.titulo.trim(),
+        descripcion: convForm.descripcion.trim(),
+        instrucciones: convForm.instrucciones.trim(),
+        limite_personas: Number(convForm.limite_personas) || 50,
+        zona: user?.zona_operacion || 'Nacional'
+      })
+      alert('Convocatoria de voluntariado publicada exitosamente.')
+      setConvForm({ titulo: '', descripcion: '', instrucciones: '', limite_personas: 50 })
+    } catch (err: any) {
+      alert(err.response?.data?.detail || 'Error al publicar convocatoria.')
+    } finally {
+      setConvCreating(false)
+    }
+  }
+
   // Edit/Share SOS States
   const [editingSos, setEditingSos] = useState<any | null>(null)
   const [editInsumo, setEditInsumo] = useState('')
@@ -609,23 +637,90 @@ export const CentroDashboard = () => {
 
         {/* VOLUNTARIOS TAB (QR) */}
         {activeTab === 'voluntarios' && (
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-blue-200 dark:border-blue-500/30 shadow-2xl p-6">
-                <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6 flex items-center gap-3 uppercase tracking-wider">
-                    <AlertTriangle className="w-6 h-6 text-blue-500 dark:text-blue-400" /> Publicar Avisos
-                </h2>
-                
-                <div className="max-w-md mx-auto text-center">
-                    <p className="text-sm text-slate-400 mb-6">Si necesitas voluntarios para ayudar en el centro o cualquier otra ayuda logística, puedes publicar un aviso en el muro público.</p>
-                    
-                    <div className="flex flex-col gap-3 mb-6">
-                        <button 
-                            onClick={handleSolicitarVoluntarios}
-                            className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 w-full transition-colors shadow-lg shadow-purple-900/20"
-                        >
-                            <AlertTriangle className="w-6 h-6" /> Solicitar Voluntarios
-                        </button>
-                    </div>
+          <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
+            {/* Formulario Convocatoria */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-rose-500/20 shadow-2xl p-6 flex flex-col justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2 flex items-center gap-3 uppercase tracking-wider">
+                      <PlusCircle className="w-6 h-6 text-rose-500" /> Crear Convocatoria
+                  </h2>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-6">Convoca voluntarios estructurados con límites y requisitos.</p>
+                  
+                  <form onSubmit={handleCreateConvocatoria} className="space-y-4">
+                      <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Título de la Convocatoria *</label>
+                          <input 
+                              type="text" 
+                              value={convForm.titulo}
+                              onChange={e => setConvForm(f => ({ ...f, titulo: e.target.value }))}
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:border-rose-500 transition-colors text-slate-900 dark:text-white"
+                              placeholder="Ej: Voluntarios de Logística y Cajas"
+                              required
+                          />
+                      </div>
+                      <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Descripción del Evento *</label>
+                          <textarea 
+                              value={convForm.descripcion}
+                              onChange={e => setConvForm(f => ({ ...f, descripcion: e.target.value }))}
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:border-rose-500 transition-colors text-slate-900 dark:text-white h-24 resize-none"
+                              placeholder="Describe brevemente las actividades que realizarán los voluntarios..."
+                              required
+                          />
+                      </div>
+                      <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Instrucciones Especiales</label>
+                          <input 
+                              type="text" 
+                              value={convForm.instrucciones}
+                              onChange={e => setConvForm(f => ({ ...f, instrucciones: e.target.value }))}
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:border-rose-500 transition-colors text-slate-900 dark:text-white"
+                              placeholder="Ej: Traer camisas azules y zapatos cerrados"
+                          />
+                      </div>
+                      <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Límite de Personas *</label>
+                          <input 
+                              type="number" 
+                              min="1"
+                              max="1000"
+                              value={convForm.limite_personas}
+                              onChange={e => setConvForm(f => ({ ...f, limite_personas: Number(e.target.value) || 50 }))}
+                              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:border-rose-500 transition-colors text-slate-900 dark:text-white"
+                              required
+                          />
+                      </div>
+                      
+                      <button 
+                          type="submit"
+                          disabled={convCreating}
+                          className="w-full bg-rose-500 hover:bg-rose-600 disabled:opacity-50 text-white py-3.5 rounded-xl font-black uppercase tracking-widest text-xs transition-colors flex justify-center items-center gap-2"
+                      >
+                          {convCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                          {convCreating ? 'Publicando...' : 'Publicar Convocatoria'}
+                      </button>
+                  </form>
+                </div>
+            </div>
+
+            {/* Aviso Rápido */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-blue-200 dark:border-blue-500/30 shadow-2xl p-6 flex flex-col justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2 flex items-center gap-3 uppercase tracking-wider">
+                      <AlertTriangle className="w-6 h-6 text-blue-500 dark:text-blue-400" /> Publicar Avisos
+                  </h2>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mb-6">Envía un aviso de ayuda rápida al feed de noticias de inmediato.</p>
+                  
+                  <div className="text-center py-6">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">Si necesitas voluntarios para ayudar de forma rápida en el centro o cualquier otra ayuda de emergencia, puedes publicar un aviso en las noticias con un solo clic.</p>
+                      
+                      <button 
+                          onClick={handleSolicitarVoluntarios}
+                          className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-4 rounded-xl font-black uppercase tracking-widest flex items-center justify-center gap-3 w-full transition-colors shadow-lg shadow-purple-900/20"
+                      >
+                          <AlertTriangle className="w-6 h-6" /> Solicitar Voluntarios
+                      </button>
+                  </div>
                 </div>
             </div>
           </div>
