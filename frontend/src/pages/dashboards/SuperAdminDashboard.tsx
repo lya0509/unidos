@@ -15,7 +15,7 @@ export const SuperAdminDashboard = () => {
   const originalAuth = useAuth();
   const [mockRol, setMockRol] = useState('comando'); // Default view
 
-  const ADMIN_EMAIL = 'laya.juanluis@gmail.com';
+  const ADMIN_EMAIL = 'juanluislaya@gmail.com';
 
   if (!originalAuth.user || (originalAuth.user.rol !== 'juan' && originalAuth.user.email !== ADMIN_EMAIL)) {
      return <div className="p-10 text-center font-bold text-red-500">ACCESO DENEGADO</div>;

@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.post("")
 async def create_anuncio(anuncio: AnuncioCentroCreate, current_user: TokenData = Depends(get_current_user)):
-    ADMIN_EMAIL = "laya.juanluis@gmail.com"
+    ADMIN_EMAIL = "juanluislaya@gmail.com"
     roles_permitidos = ["centro_acopio", "comunidad", "refugio", "clinica", "lider_vecinal", "iniciativa_ciudadana"]
     if current_user.get("rol") not in roles_permitidos and current_user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="No tienes permiso para crear anuncios.")

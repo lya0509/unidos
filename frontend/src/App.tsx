@@ -14,7 +14,7 @@ import { CommandDashboard } from './pages/dashboards/CommandDashboard'
 import { HeartHandshake, Loader2, BarChart3 } from 'lucide-react'
 
 // Email del administrador supremo
-const ADMIN_EMAIL = 'laya.juanluis@gmail.com'
+const ADMIN_EMAIL = 'juanluislaya@gmail.com'
 
 function Dashboard() {
   const { user } = useAuth()

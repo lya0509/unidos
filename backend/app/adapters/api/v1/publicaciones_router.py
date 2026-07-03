@@ -90,7 +90,7 @@ def reportar_publicacion(id: str, body: ReporteCreate = ReporteCreate()):
 
 # Endpoints de administración (exclusivos para juan / admin)
 
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "laya.juanluis@gmail.com")
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "juanluislaya@gmail.com")
 
 def verify_admin(current_user: dict = Depends(get_current_user)):
     """Verifica que el usuario sea el administrador supremo por email."""

@@ -190,7 +190,7 @@ def get_directorio(zona: str = ''):
 @router.get('/auditoria', tags=['Admin'])
 def get_auditoria_identidades(current_user: dict = Depends(get_current_user)):
     # Limit to admin email
-    if current_user.get("email") != "laya.juanluis@gmail.com":
+    if current_user.get("email") != "juanluislaya@gmail.com":
         raise HTTPException(status_code=403, detail="Acceso denegado")
     try:
         res = db.client.table('usuarios').select('id, nombre, email, rol, foto_cedula_url, foto_rostro_url, verificado, activo').not_.is_('foto_cedula_url', 'null').execute()
@@ -200,7 +200,7 @@ def get_auditoria_identidades(current_user: dict = Depends(get_current_user)):
 
 @router.post('/usuarios/{user_id}/rechazar-identidad', tags=['Admin'])
 def rechazar_identidad(user_id: str, current_user: dict = Depends(get_current_user)):
-    if current_user.get("email") != "laya.juanluis@gmail.com":
+    if current_user.get("email") != "juanluislaya@gmail.com":
         raise HTTPException(status_code=403, detail="Acceso denegado")
     try:
         db.client.table('usuarios').update({
@@ -214,7 +214,7 @@ def rechazar_identidad(user_id: str, current_user: dict = Depends(get_current_us
 
 @router.delete('/usuarios/{user_id}', tags=['Admin'])
 def delete_user_by_admin(user_id: str, current_user: dict = Depends(get_current_user)):
-    if current_user.get("email") != "laya.juanluis@gmail.com":
+    if current_user.get("email") != "juanluislaya@gmail.com":
         raise HTTPException(status_code=403, detail="Acceso denegado")
     try:
         db.client.table('usuarios').delete().eq('id', user_id).execute()
@@ -228,7 +228,7 @@ def delete_user_by_admin(user_id: str, current_user: dict = Depends(get_current_
 
 @router.get('/admin/usuarios', tags=['Admin'])
 def list_usuarios_admin(current_user: dict = Depends(get_current_user)):
-    if current_user.get("email") != "laya.juanluis@gmail.com":
+    if current_user.get("email") != "juanluislaya@gmail.com":
         raise HTTPException(status_code=403, detail="Acceso denegado: Se requiere superadmin")
     try:
         res = db.client.table('usuarios').select('id, nombre, email, rol, zona_operacion, telefono, verificado, activo, created_at').order('created_at', desc=True).execute()
@@ -238,7 +238,7 @@ def list_usuarios_admin(current_user: dict = Depends(get_current_user)):
 
 @router.put('/usuarios/{user_id}/cambiar-estado', tags=['Admin'])
 def cambiar_estado_usuario(user_id: str, activo: bool, current_user: dict = Depends(get_current_user)):
-    if current_user.get("email") != "laya.juanluis@gmail.com":
+    if current_user.get("email") != "juanluislaya@gmail.com":
         raise HTTPException(status_code=403, detail="Acceso denegado: Se requiere superadmin")
     try:
         res = db.client.table('usuarios').update({'activo': activo}).eq('id', user_id).execute()
@@ -252,7 +252,7 @@ def cambiar_estado_usuario(user_id: str, activo: bool, current_user: dict = Depe
 
 @router.put('/usuarios/{user_id}/aprobar-identidad', tags=['Admin'])
 def aprobar_identidad_manual(user_id: str, current_user: dict = Depends(get_current_user)):
-    if current_user.get("email") != "laya.juanluis@gmail.com":
+    if current_user.get("email") != "juanluislaya@gmail.com":
         raise HTTPException(status_code=403, detail="Acceso denegado: Se requiere superadmin")
     try:
         res = db.client.table('usuarios').update({'verificado': True}).eq('id', user_id).execute()
