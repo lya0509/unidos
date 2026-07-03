@@ -183,24 +183,24 @@ export const Register: React.FC<RegisterProps> = ({ onNavigateToLogin, onNavigat
             <div>
               <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Clasificación / Rol</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-blue-600 dark:text-blue-500 pointer-events-none">
+                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-blue-600 dark:text-blue-500 pointer-events-none z-10">
                   <Shield className="w-5 h-5" />
                 </span>
-                <input
-                    list="roles_list"
+                <select
                     value={rol}
-                    onChange={(e) => setRol(e.target.value.toLowerCase())}
-                    placeholder="Escribe o selecciona tu rol"
-                    className="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 text-sm font-bold text-slate-900 dark:text-white transition-all appearance-none uppercase tracking-wider"
-                  />
-                  <datalist id="roles_list">
+                    onChange={(e) => setRol(e.target.value)}
+                    className="w-full pl-12 pr-10 py-3.5 bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 text-sm font-bold text-slate-900 dark:text-white transition-all uppercase tracking-wider appearance-none cursor-pointer"
+                  >
                     <option value="comunidad">🏘️ Comunidad (Centro Temporal)</option>
                     <option value="refugio">⛺ Refugio / Campamento</option>
                     <option value="lider_vecinal">👤 Líder Vecinal</option>
                     <option value="clinica">🏥 Clínica / Hospital</option>
                     <option value="centro_acopio">📦 Centro de Acopio</option>
                     <option value="iniciativa_ciudadana">🤝 Iniciativa Ciudadana</option>
-                  </datalist>
+                  </select>
+                  <span className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-400">
+                    ▼
+                  </span>
               </div>
             </div>
 
