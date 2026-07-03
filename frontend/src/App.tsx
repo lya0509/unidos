@@ -11,7 +11,9 @@ import { LiderDashboard } from './pages/dashboards/LiderDashboard'
 import { CentroDashboard } from './pages/dashboards/CentroDashboard'
 import { IniciativaDashboard } from './pages/dashboards/IniciativaDashboard'
 import { CommandDashboard } from './pages/dashboards/CommandDashboard'
-import { HeartHandshake, Loader2, BarChart3 } from 'lucide-react'
+import { HeartHandshake, Loader2, BarChart3, AlertOctagon, Send } from 'lucide-react'
+import api from './services/api'
+
 
 // Email del administrador supremo
 const ADMIN_EMAIL = 'juanluislaya@gmail.com'
@@ -169,6 +171,39 @@ export default function AppWrapper() {
 
 function AppContent({ screen, setScreen }: { screen: 'landing' | 'guest' | 'login' | 'register', setScreen: (s: 'landing' | 'guest' | 'login' | 'register') => void }) {
   const { token, loading } = useAuth()
+  
+  // Estados globales de reporte de fallas
+  const [showFallasModal, setShowFallasModal] = useState(false)
+  const [fallaNombre, setFallaNombre] = useState('')
+  const [fallaEmail, setFallaEmail] = useState('')
+  const [fallaDescripcion, setFallaDescripcion] = useState('')
+  const [fallaEnviando, setFallaEnviando] = useState(false)
+
+  const handleReportarFallaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fallaDescripcion.trim()) return;
+    
+    setFallaEnviando(true);
+    try {
+      await api.post('/fallas', {
+        nombre_usuario: fallaNombre.trim() ? fallaNombre.trim() : "Anónimo",
+        email: fallaEmail.trim(),
+        descripcion: fallaDescripcion.trim(),
+        dispositivo: navigator.userAgent || "Navegador Web"
+      });
+      
+      alert("¡Reporte de falla enviado con éxito! Los administradores del sistema lo revisarán pronto.");
+      setFallaNombre('');
+      setFallaEmail('');
+      setFallaDescripcion('');
+      setShowFallasModal(false);
+    } catch (err) {
+      alert("No se pudo enviar el reporte. Por favor, intenta de nuevo.");
+      console.error(err);
+    } finally {
+      setFallaEnviando(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -178,17 +213,107 @@ function AppContent({ screen, setScreen }: { screen: 'landing' | 'guest' | 'logi
     )
   }
 
-  if (!token) {
-    if (screen === 'landing') {
-      return <LandingPage onEnterAsCitizen={() => setScreen('guest')} onEnterAsAcopio={() => setScreen('login')} />
+  const renderActiveScreen = () => {
+    if (!token) {
+      if (screen === 'landing') {
+        return <LandingPage onEnterAsCitizen={() => setScreen('guest')} onEnterAsAcopio={() => setScreen('login')} />
+      }
+      if (screen === 'guest') {
+        return <CiudadanoDashboard onNavigateToLogin={() => setScreen('login')} onBackToLanding={() => setScreen('landing')} />
+      }
+      return screen === 'login'
+        ? <Login onNavigateToRegister={() => setScreen('register')} onNavigateToGuest={() => setScreen('landing')} />
+        : <Register onNavigateToLogin={() => setScreen('login')} onNavigateToGuest={() => setScreen('landing')} />
     }
-    if (screen === 'guest') {
-      return <CiudadanoDashboard onNavigateToLogin={() => setScreen('login')} onBackToLanding={() => setScreen('landing')} />
-    }
-    return screen === 'login'
-      ? <Login onNavigateToRegister={() => setScreen('register')} onNavigateToGuest={() => setScreen('landing')} />
-      : <Register onNavigateToLogin={() => setScreen('login')} onNavigateToGuest={() => setScreen('landing')} />
+    return <Dashboard />
   }
 
-  return <Dashboard />
+  return (
+    <>
+      {renderActiveScreen()}
+
+      {/* BOTÓN FLOTANTE GLOBAL PARA REPORTAR FALLAS (Esquina inferior izquierda) */}
+      <div className="fixed bottom-4 left-4 z-[9999]">
+        <button
+          onClick={() => setShowFallasModal(true)}
+          className="p-3 bg-red-600 hover:bg-red-500 text-white rounded-full shadow-[0_0_15px_rgba(220,38,38,0.3)] transition-all active:scale-90 flex items-center justify-center border border-red-500"
+          title="Reportar falla técnica"
+        >
+          <AlertOctagon className="w-5 h-5 animate-pulse" />
+        </button>
+      </div>
+
+      {/* MODAL GLOBAL REPORTAR FALLA */}
+      {showFallasModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[10000] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4 text-slate-900 dark:text-white">
+            <div>
+              <h3 className="text-lg font-black uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-2">
+                <AlertOctagon className="w-5 h-5 text-red-500" /> Reportar Falla Técnica
+              </h3>
+              <p className="text-xs text-slate-500">Describe el bug o error técnico para que podamos solucionarlo.</p>
+            </div>
+            
+            <form onSubmit={handleReportarFallaSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Tu Nombre (Opcional)</label>
+                <input 
+                  type="text" 
+                  value={fallaNombre}
+                  onChange={e => setFallaNombre(e.target.value)}
+                  placeholder="Ej: Pedro de Chacao"
+                  className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-bold text-sm outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Tu Correo (Opcional)</label>
+                <input 
+                  type="email" 
+                  value={fallaEmail}
+                  onChange={e => setFallaEmail(e.target.value)}
+                  placeholder="Ej: pedro@gmail.com"
+                  className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-bold text-sm outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-red-500 mb-1.5 uppercase tracking-widest">¿Qué está fallando? *</label>
+                <textarea 
+                  required
+                  value={fallaDescripcion}
+                  onChange={e => setFallaDescripcion(e.target.value)}
+                  placeholder="Ej: El botón de registrar personas no responde o la app tarda mucho en cargar el mapa."
+                  className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-medium text-sm h-28 resize-none outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setFallaNombre('');
+                    setFallaEmail('');
+                    setFallaDescripcion('');
+                    setShowFallasModal(false);
+                  }}
+                  className="px-4 py-2.5 rounded-xl font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs uppercase tracking-wider transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  disabled={fallaEnviando || !fallaDescripcion.trim()}
+                  className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center gap-2"
+                >
+                  {fallaEnviando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  Enviar Reporte
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  )
 }
