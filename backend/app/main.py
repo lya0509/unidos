@@ -44,43 +44,49 @@ from app.adapters.database.connection import db
 
 async def cleanup_db_loop():
     while True:
+        now = datetime.now(timezone.utc)
+        
+        # 1. Borrar SOS expirados (más de 6 horas)
         try:
-            now = datetime.now(timezone.utc)
             six_hours_ago = (now - timedelta(hours=6)).isoformat()
-            three_days_ago = (now - timedelta(days=3)).isoformat()
-            
-            # Borrar SOS expirados (más de 6 horas)
             db.client.table("solicitudes_sos").delete().lte("created_at", six_hours_ago).execute()
-            
-            # Borrar SOS resueltos o cancelados
+        except Exception as e:
+            print(f"[Limpieza] Error borrando SOS expirados: {e}")
+        
+        # 2. Borrar SOS resueltos o cancelados
+        try:
             db.client.table("solicitudes_sos").delete().in_("estado", ["entregada", "cancelada"]).execute()
-            
-            # Borrar mensajes del chat global con más de 3 días
+        except Exception as e:
+            print(f"[Limpieza] Error borrando SOS resueltos: {e}")
+        
+        # 3. Borrar mensajes del chat global con más de 3 días
+        try:
+            three_days_ago = (now - timedelta(days=3)).isoformat()
             db.client.table("mensajes_chat").delete().eq("room_id", "global_chat").lte("created_at", three_days_ago).execute()
-            
-            # Borrar reportes visuales con más de 24 horas y sus archivos asociados en storage
+        except Exception as e:
+            print(f"[Limpieza] Error borrando mensajes de chat: {e}")
+        
+        # 4. Borrar publicaciones visuales con más de 24 horas
+        try:
             one_day_ago = (now - timedelta(days=1)).isoformat()
             to_delete = db.client.table("publicaciones_visuales").select("id, media_url").lte("created_at", one_day_ago).execute()
             if to_delete.data:
                 for pub in to_delete.data:
                     pub_id = pub.get("id")
                     media_url = pub.get("media_url")
-                    
-                    # Eliminar de la DB
                     db.client.table("publicaciones_visuales").delete().eq("id", pub_id).execute()
-                    
-                    # Eliminar archivo físico de Supabase Storage
                     if media_url and "publicaciones" in media_url:
                         try:
                             filename = media_url.split("/")[-1]
                             db.client.storage.from_("publicaciones").remove([filename])
-                            print(f"Limpieza Automática: Archivo {filename} eliminado de Supabase Storage.")
+                            print(f"[Limpieza] Archivo {filename} eliminado de Storage.")
                         except Exception as se:
-                            print(f"Error borrando archivo de storage en limpieza: {se}")
-            
+                            print(f"[Limpieza] Error borrando archivo de storage: {se}")
+                print(f"[Limpieza] {len(to_delete.data)} publicaciones de +24h eliminadas.")
         except Exception as e:
-            print(f"Error en limpieza de DB: {e}")
-        await asyncio.sleep(3600) # Dormir por 1 hora
+            print(f"[Limpieza] Error borrando publicaciones visuales: {e}")
+        
+        await asyncio.sleep(3600)  # Dormir 1 hora
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

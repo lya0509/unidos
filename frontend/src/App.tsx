@@ -11,24 +11,28 @@ import { LiderDashboard } from './pages/dashboards/LiderDashboard'
 import { CentroDashboard } from './pages/dashboards/CentroDashboard'
 import { IniciativaDashboard } from './pages/dashboards/IniciativaDashboard'
 import { CommandDashboard } from './pages/dashboards/CommandDashboard'
-
 import { HeartHandshake, Loader2, BarChart3 } from 'lucide-react'
+
+// Email del administrador supremo
+const ADMIN_EMAIL = 'laya.juanluis@gmail.com'
 
 function Dashboard() {
   const { user } = useAuth()
   const [page, setPage] = useState<'home' | 'stats'>('home')
 
   const renderDashboard = () => {
+    // Acceso de superadmin por rol especial O por email
+    if (user?.rol === 'juan' || user?.email === ADMIN_EMAIL) {
+      return <SuperAdminDashboard />
+    }
     switch (user?.rol) {
-      case 'juan':
-        return <SuperAdminDashboard />
       case 'ciudadano':
       case 'voluntario':
         return <CiudadanoDashboard />
       case 'lider_vecinal':
         return <LiderDashboard />
       case 'iniciativa_ciudadana':
-      case 'iniciativa_ciudadíana': // Just in case of encoding weirdness
+      case 'iniciativa_ciudadíana':
         return <IniciativaDashboard />
       case 'centro_acopio':
       case 'medico':
@@ -44,26 +48,26 @@ function Dashboard() {
   return (
     <div className="min-h-screen relative font-sans selection:bg-blue-500/30 overflow-x-hidden w-full max-w-[100vw]">
       <WhatsNewCarousel />
-      {/* VENEZUELAN TOP BAR */}
+      {/* Barra tricolor venezolana */}
       <div className="h-1.5 w-full fixed top-0 left-0 z-[100] flex">
         <div className="w-1/3 bg-[#FCE300]"></div>
         <div className="w-1/3 bg-[#0038A8]"></div>
         <div className="w-1/3 bg-[#CE1126]"></div>
       </div>
       <GlobalSosAlert />
-      
-      {/* Main Content Area sin restriccion de ancho maximo */}
+
+      {/* Contenido principal */}
       <main className="w-full relative z-10">
         {page === 'stats' ? <CommandDashboard /> : renderDashboard()}
       </main>
 
-      {/* FAB para Command Center (Global) */}
+      {/* FAB para Command Center */}
       <div className="fixed top-24 right-4 z-[9999]">
-         <button 
+         <button
             onClick={() => setPage(page === 'stats' ? 'home' : 'stats')}
             className={`p-3 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.3)] transition-all active:scale-90 border backdrop-blur-md ${
-              page === 'stats' 
-                ? 'bg-blue-600/90 text-white border-blue-500' 
+              page === 'stats'
+                ? 'bg-blue-600/90 text-white border-blue-500'
                 : 'bg-slate-900/80 text-blue-400 border-slate-700 hover:bg-slate-800'
             }`}
             title="Centro de Comando"
@@ -101,7 +105,7 @@ function GlobalSosAlert() {
   const onEnd = () => {
     if (!isDragging.current) return;
     isDragging.current = false;
-    
+
     if (Math.abs(offset.x) > 100 || Math.abs(offset.y) > 100) {
       setIsExiting(true);
       setTimeout(() => {
@@ -117,11 +121,11 @@ function GlobalSosAlert() {
   if (!newSosEvent) return null;
 
   return (
-    <div 
+    <div
       className={`fixed top-20 left-1/2 z-[100] w-[90%] max-w-sm touch-none select-none transition-transform ${isExiting ? 'opacity-0 scale-95 duration-200' : ''}`}
-      style={{ 
-        transform: `translate(calc(-50% + ${offset.x}px), ${offset.y}px)`, 
-        transition: isDragging.current ? 'none' : 'transform 0.2s ease-out, opacity 0.2s, scale 0.2s' 
+      style={{
+        transform: `translate(calc(-50% + ${offset.x}px), ${offset.y}px)`,
+        transition: isDragging.current ? 'none' : 'transform 0.2s ease-out, opacity 0.2s, scale 0.2s'
       }}
       onTouchStart={(e) => onStart(e.touches[0].clientX, e.touches[0].clientY)}
       onTouchMove={(e) => onMove(e.touches[0].clientX, e.touches[0].clientY)}
@@ -150,7 +154,7 @@ function GlobalSosAlert() {
 
 export default function AppWrapper() {
   const [screen, setScreen] = useState<'landing' | 'guest' | 'login' | 'register'>('landing')
-  
+
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -181,7 +185,7 @@ function AppContent({ screen, setScreen }: { screen: 'landing' | 'guest' | 'logi
     if (screen === 'guest') {
       return <CiudadanoDashboard onNavigateToLogin={() => setScreen('login')} onBackToLanding={() => setScreen('landing')} />
     }
-    return screen === 'login' 
+    return screen === 'login'
       ? <Login onNavigateToRegister={() => setScreen('register')} onNavigateToGuest={() => setScreen('landing')} />
       : <Register onNavigateToLogin={() => setScreen('login')} onNavigateToGuest={() => setScreen('landing')} />
   }

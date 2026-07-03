@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
-import { HeartHandshake, User as UserIcon, Mail, Lock, Shield, MapPin, Loader2, Map as MapIcon, Activity, Check, Sun, Moon, Battery } from 'lucide-react'
+import { HeartHandshake, User as UserIcon, Mail, Lock, Shield, MapPin, Loader2, Map as MapIcon, Activity, Check, Sun, Moon, Battery, Eye, EyeOff } from 'lucide-react'
 import { LocationPickerMap } from '../components/LocationPickerMap'
 
 
@@ -25,8 +25,9 @@ export const Register: React.FC<RegisterProps> = ({ onNavigateToLogin, onNavigat
   const [loading, setLoading] = useState(false)
   
   const [showMap, setShowMap] = useState(false)
-  const [mapLat, setMapLat] = useState(10.4682) // Caracas approx
-  const [mapLon, setMapLon] = useState(-66.6025) // Guarenas approx
+  const [mapLat, setMapLat] = useState(10.4682)
+  const [mapLon, setMapLon] = useState(-66.6025)
+  const [showPassword, setShowPassword] = useState(false)
 
   const openMapWithLocation = () => {
     if (!navigator.geolocation) {
@@ -159,14 +160,22 @@ export const Register: React.FC<RegisterProps> = ({ onNavigateToLogin, onNavigat
                 <Lock className="w-5 h-5" />
               </span>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={contrasena}
                 onChange={(e) => setContrasena(e.target.value)}
                 placeholder="Min. 6 caracteres"
                 minLength={6}
-                className="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-500 transition-all tracking-widest"
+                className="w-full pl-12 pr-12 py-3.5 bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-500 transition-all tracking-widest"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-blue-500 transition-colors"
+                title={showPassword ? 'Ocultar contraseña' : 'Ver contraseña'}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
           </div>
 
@@ -185,10 +194,12 @@ export const Register: React.FC<RegisterProps> = ({ onNavigateToLogin, onNavigat
                     className="w-full pl-12 pr-4 py-3.5 bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-700 rounded-lg outline-none focus:border-blue-500 text-sm font-bold text-slate-900 dark:text-white transition-all appearance-none uppercase tracking-wider"
                   />
                   <datalist id="roles_list">
-                    <option value="comunidad">Comunidad (Centro Temporal)</option>
-                    <option value="refugio">Refugio (Campamento)</option>
-                    <option value="lider_vecinal">Líder Vecinal</option>
-                    <option value="clinica">Clínica / Hospital</option>
+                    <option value="comunidad">🏘️ Comunidad (Centro Temporal)</option>
+                    <option value="refugio">⛺ Refugio / Campamento</option>
+                    <option value="lider_vecinal">👤 Líder Vecinal</option>
+                    <option value="clinica">🏥 Clínica / Hospital</option>
+                    <option value="centro_acopio">📦 Centro de Acopio</option>
+                    <option value="iniciativa_ciudadana">🤝 Iniciativa Ciudadana</option>
                   </datalist>
               </div>
             </div>

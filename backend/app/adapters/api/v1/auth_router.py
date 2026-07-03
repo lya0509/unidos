@@ -16,6 +16,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 @limiter.limit("5/hour")
 def register(request: Request, user: UserCreate):
 
+    # Validar roles permitidos
+    roles_permitidos = ["centro_acopio", "comunidad", "refugio", "clinica", "lider_vecinal", "iniciativa_ciudadana"]
+    if user.rol not in roles_permitidos:
+        raise HTTPException(status_code=400, detail="El rol especificado no está permitido para registro público.")
+
     # Verificar si existe
     existing_user = user_repo.get_user_by_email(user.email)
     if existing_user:
@@ -58,6 +63,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = create_access_token(
         data={
             "sub": user_dict["email"], 
+            "email": user_dict["email"],
+            "nombre": user_dict.get("nombre", "Usuario"),
             "rol": user_dict["rol"], 
             "user_id": str(user_dict["id"]), 
             "zona_operacion": user_dict.get("zona_operacion"),
@@ -181,16 +188,20 @@ def get_directorio(zona: str = ''):
         return []
 
 @router.get('/auditoria', tags=['Admin'])
-def get_auditoria_identidades():
+def get_auditoria_identidades(current_user: dict = Depends(get_current_user)):
+    # Limit to admin email
+    if current_user.get("email") != "laya.juanluis@gmail.com":
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     try:
-        # Get users with identity photos
         res = db.client.table('usuarios').select('id, nombre, email, rol, foto_cedula_url, foto_rostro_url, verificado, activo').not_.is_('foto_cedula_url', 'null').execute()
         return res.data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post('/usuarios/{user_id}/rechazar-identidad', tags=['Admin'])
-def rechazar_identidad(user_id: str):
+def rechazar_identidad(user_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != "laya.juanluis@gmail.com":
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     try:
         db.client.table('usuarios').update({
             'foto_cedula_url': None,
@@ -202,9 +213,53 @@ def rechazar_identidad(user_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete('/usuarios/{user_id}', tags=['Admin'])
-def delete_user_by_admin(user_id: str):
+def delete_user_by_admin(user_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != "laya.juanluis@gmail.com":
+        raise HTTPException(status_code=403, detail="Acceso denegado")
     try:
         db.client.table('usuarios').delete().eq('id', user_id).execute()
         return {'mensaje': 'Usuario eliminado'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ==========================================
+# NUEVOS ENDPOINTS DE ADMINISTRACIÓN SUPREMA
+# ==========================================
+
+@router.get('/admin/usuarios', tags=['Admin'])
+def list_usuarios_admin(current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != "laya.juanluis@gmail.com":
+        raise HTTPException(status_code=403, detail="Acceso denegado: Se requiere superadmin")
+    try:
+        res = db.client.table('usuarios').select('id, nombre, email, rol, zona_operacion, telefono, verificado, activo, created_at').order('created_at', desc=True).execute()
+        return res.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put('/usuarios/{user_id}/cambiar-estado', tags=['Admin'])
+def cambiar_estado_usuario(user_id: str, activo: bool, current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != "laya.juanluis@gmail.com":
+        raise HTTPException(status_code=403, detail="Acceso denegado: Se requiere superadmin")
+    try:
+        res = db.client.table('usuarios').update({'activo': activo}).eq('id', user_id).execute()
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        estado_txt = "activado" if activo else "suspendido"
+        print(f"[AUDIT] Usuario {user_id} ha sido {estado_txt} por el administrador.")
+        return {'mensaje': f'Usuario {estado_txt} con éxito'}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put('/usuarios/{user_id}/aprobar-identidad', tags=['Admin'])
+def aprobar_identidad_manual(user_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user.get("email") != "laya.juanluis@gmail.com":
+        raise HTTPException(status_code=403, detail="Acceso denegado: Se requiere superadmin")
+    try:
+        res = db.client.table('usuarios').update({'verificado': True}).eq('id', user_id).execute()
+        if not res.data:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        print(f"[AUDIT] Identidad del usuario {user_id} aprobada manualmente por admin.")
+        return {'mensaje': 'Identidad verificada manualmente'}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

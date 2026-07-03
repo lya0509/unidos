@@ -6,6 +6,7 @@ import { LiderDashboard } from './LiderDashboard';
 import { CommandDashboard } from './CommandDashboard';
 import { IdentityAuditPanel } from './IdentityAuditPanel';
 import { PostModerationPanel } from '../../components/PostModerationPanel';
+import { UserManagementPanel } from '../../components/UserManagementPanel';
 import { AuthContext, useAuth } from '../../context/AuthContext';
 import { ShieldAlert, LogOut } from 'lucide-react';
 
@@ -13,7 +14,9 @@ export const SuperAdminDashboard = () => {
   const originalAuth = useAuth();
   const [mockRol, setMockRol] = useState('comando'); // Default view
 
-  if (!originalAuth.user || originalAuth.user.rol !== 'juan') {
+  const ADMIN_EMAIL = 'laya.juanluis@gmail.com';
+
+  if (!originalAuth.user || (originalAuth.user.rol !== 'juan' && originalAuth.user.email !== ADMIN_EMAIL)) {
      return <div className="p-10 text-center font-bold text-red-500">ACCESO DENEGADO</div>;
   }
 
@@ -35,6 +38,7 @@ export const SuperAdminDashboard = () => {
        case 'comando': return <CommandDashboard />;
        case 'auditoria': return <IdentityAuditPanel />;
        case 'moderacion': return <PostModerationPanel />;
+       case 'usuarios_db': return <UserManagementPanel />;
        default: return null;
     }
   };
@@ -65,7 +69,8 @@ export const SuperAdminDashboard = () => {
              { id: 'iniciativa_ciudadana', label: 'Iniciativa' },
              { id: 'ciudadano', label: 'Ciudadano' },
              { id: 'auditoria', label: 'Auditoría de Identidades' },
-             { id: 'moderacion', label: 'Moderación de Muro' }
+             { id: 'moderacion', label: 'Moderación de Muro' },
+             { id: 'usuarios_db', label: '👥 Gestión de Usuarios (Real)' }
           ].map(r => (
             <button 
                key={r.id}
