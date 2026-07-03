@@ -7,6 +7,7 @@ import { CommandDashboard } from './CommandDashboard';
 import { IdentityAuditPanel } from './IdentityAuditPanel';
 import { PostModerationPanel } from '../../components/PostModerationPanel';
 import { UserManagementPanel } from '../../components/UserManagementPanel';
+import { FallasManagementPanel } from '../../components/FallasManagementPanel';
 import { AuthContext, useAuth } from '../../context/AuthContext';
 import { ShieldAlert, LogOut } from 'lucide-react';
 
@@ -39,6 +40,7 @@ export const SuperAdminDashboard = () => {
        case 'auditoria': return <IdentityAuditPanel />;
        case 'moderacion': return <PostModerationPanel />;
        case 'usuarios_db': return <UserManagementPanel />;
+       case 'fallas_db': return <FallasManagementPanel />;
        default: return null;
     }
   };
@@ -70,7 +72,8 @@ export const SuperAdminDashboard = () => {
              { id: 'ciudadano', label: 'Ciudadano' },
              { id: 'auditoria', label: 'Auditoría de Identidades' },
              { id: 'moderacion', label: 'Moderación de Muro' },
-             { id: 'usuarios_db', label: '👥 Gestión de Usuarios (Real)' }
+             { id: 'usuarios_db', label: '👥 Gestión de Usuarios (Real)' },
+             { id: 'fallas_db', label: '🛠️ Reportes de Fallas' }
           ].map(r => (
             <button 
                key={r.id}

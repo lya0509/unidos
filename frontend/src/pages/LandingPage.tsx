@@ -4,7 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { 
   Activity, MapPin, Users, Package, AlertTriangle, Radio, 
   Sun, Moon, Battery, Share2, Camera, Plus, Heart, Info, 
-  Shield, MessageSquare, Loader2, Sparkles, Megaphone, Flag, Send, Download
+  Shield, MessageSquare, Loader2, Sparkles, Megaphone, Flag, Send, Download, AlertOctagon
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -33,6 +33,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCitizen, onEn
   const [newFile, setNewFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Reporte de fallas States
+  const [showFallasModal, setShowFallasModal] = useState(false);
+  const [fallaNombre, setFallaNombre] = useState('');
+  const [fallaEmail, setFallaEmail] = useState('');
+  const [fallaDescripcion, setFallaDescripcion] = useState('');
+  const [fallaEnviando, setFallaEnviando] = useState(false);
 
   // Helper: tiempo relativo legible
   const formatTiempoRelativo = (fechaISO: string): string => {
@@ -137,7 +144,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCitizen, onEn
       setUploading(false);
     }
   };
-
+  const handleReportarFallaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fallaDescripcion.trim()) return;
+    
+    setFallaEnviando(true);
+    try {
+      await api.post('/fallas', {
+        nombre_usuario: fallaNombre.trim() ? fallaNombre.trim() : "Anónimo",
+        email: fallaEmail.trim(),
+        descripcion: fallaDescripcion.trim(),
+        dispositivo: navigator.userAgent || "Navegador Web"
+      });
+      
+      alert("¡Reporte de falla enviado con éxito! Los administradores del sistema lo revisarán pronto.");
+      setFallaNombre('');
+      setFallaEmail('');
+      setFallaDescripcion('');
+      setShowFallasModal(false);
+    } catch (err) {
+      alert("No se pudo enviar el reporte. Por favor, intenta de nuevo.");
+      console.error(err);
+    } finally {
+      setFallaEnviando(false);
+    }
+  };
   const handleReportPost = async (id: string) => {
     const motivo = prompt(
       'Selecciona el motivo del reporte (escribe el número):\n1. Falsa\n2. Inadecuada o Inapropiada\n3. Perjudicial o Peligrosa'
@@ -541,6 +572,89 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCitizen, onEn
                 >
                   {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   Publicar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      {/* FOOTER */}
+      <footer className="max-w-4xl mx-auto px-4 mt-20 pb-8 text-center border-t border-slate-200 dark:border-slate-800/80 pt-6">
+        <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest flex items-center justify-center gap-1.5">
+          © {new Date().getFullYear()} Unidos Venezuela. Todos los derechos reservados.
+        </p>
+        <button 
+          onClick={() => setShowFallasModal(true)}
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-black text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors"
+        >
+          <AlertOctagon className="w-4 h-4 animate-pulse" /> ¿Algo no funciona? Reportar Falla en el Sistema
+        </button>
+      </footer>
+
+      {/* MODAL REPORTAR FALLA */}
+      {showFallasModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl space-y-4">
+            <div>
+              <h3 className="text-lg font-black uppercase text-slate-900 dark:text-white tracking-wider flex items-center gap-2">
+                <AlertOctagon className="w-5 h-5 text-red-500" /> Reportar Falla Técnica
+              </h3>
+              <p className="text-xs text-slate-500">Describe el bug o error técnico para que podamos solucionarlo.</p>
+            </div>
+            
+            <form onSubmit={handleReportarFallaSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Tu Nombre (Opcional)</label>
+                <input 
+                  type="text" 
+                  value={fallaNombre}
+                  onChange={e => setFallaNombre(e.target.value)}
+                  placeholder="Ej: Pedro de Chacao"
+                  className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-bold text-sm outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-widest">Tu Correo (Opcional)</label>
+                <input 
+                  type="email" 
+                  value={fallaEmail}
+                  onChange={e => setFallaEmail(e.target.value)}
+                  placeholder="Ej: pedro@gmail.com"
+                  className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-bold text-sm outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-red-500 mb-1.5 uppercase tracking-widest">¿Qué está fallando? *</label>
+                <textarea 
+                  required
+                  value={fallaDescripcion}
+                  onChange={e => setFallaDescripcion(e.target.value)}
+                  placeholder="Ej: El botón de registrar personas no responde o la app tarda mucho en cargar el mapa."
+                  className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-medium text-sm h-28 resize-none outline-none focus:border-red-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setFallaNombre('');
+                    setFallaEmail('');
+                    setFallaDescripcion('');
+                    setShowFallasModal(false);
+                  }}
+                  className="px-4 py-2.5 rounded-xl font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs uppercase tracking-wider transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit"
+                  disabled={fallaEnviando || !fallaDescripcion.trim()}
+                  className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center gap-2"
+                >
+                  {fallaEnviando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  Enviar Reporte
                 </button>
               </div>
             </form>

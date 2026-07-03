@@ -168,6 +168,7 @@ from app.adapters.api.v1.personas_router import router as personas_router
 from app.adapters.api.v1.voluntarios_router import router as voluntarios_router
 from app.adapters.api.v1.reportes_router import router as reportes_router
 from app.adapters.api.v1.publicaciones_router import router as publicaciones_router
+from app.adapters.api.v1.fallas_router import router as fallas_router
 from app.adapters.api.v1 import qr_router, ws_router, stats_router
 
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Autenticación"])
@@ -180,6 +181,7 @@ app.include_router(personas_router, prefix="/api/v1/personas", tags=["Censo de P
 app.include_router(voluntarios_router, prefix="/api/v1/voluntarios", tags=["Voluntarios"])
 app.include_router(reportes_router, prefix="/api/v1/reportes", tags=["Reportes Antifraude"])
 app.include_router(publicaciones_router, prefix="/api/v1/publicaciones", tags=["Muro de Reportes Visuales"])
+app.include_router(fallas_router, prefix="/api/v1/fallas", tags=["Reportes de Fallas del Sistema"])
 app.include_router(qr_router.router, prefix="/api/v1/qr", tags=["Trazabilidad QR"])
 app.include_router(ws_router.router, prefix="/api/v1/ws", tags=["WebSockets"])
 app.include_router(stats_router.router, prefix="/api/v1/stats", tags=["Estadísticas"])
