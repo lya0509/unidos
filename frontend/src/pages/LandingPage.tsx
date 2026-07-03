@@ -577,6 +577,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterAsCitizen, onEn
             </form>
           </div>
         </div>
+      )}
       {/* FOOTER */}
       <footer className="max-w-4xl mx-auto px-4 mt-20 pb-8 text-center border-t border-slate-200 dark:border-slate-800/80 pt-6">
         <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest flex items-center justify-center gap-1.5">
