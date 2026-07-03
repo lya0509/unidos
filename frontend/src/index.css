@@ -150,10 +150,10 @@ button[class*="bg-slate-900"] {
   background: #000000 !important;
 }
 .battery-saver .leaflet-tile-pane {
-  filter: grayscale(100%) brightness(0.25) contrast(2.5) !important;
+  filter: grayscale(100%) brightness(0.6) contrast(2.2) !important;
 }
 .battery-saver .leaflet-tile {
-  filter: grayscale(100%) brightness(0.25) contrast(2.5) !important;
+  filter: grayscale(100%) brightness(0.6) contrast(2.2) !important;
   background-color: #000000 !important;
 }
 .battery-saver .leaflet-bar,
