@@ -5,11 +5,12 @@ from passlib.context import CryptContext
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    SECRET_KEY: str = "super_secret_key_change_this_in_production_venezuela_2026"
+    # Valores reales en backend/.env (ver .env.example). Sin valores por defecto a propósito.
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440 # 24 horas para facilitar el uso en contingencia
-    SUPABASE_URL: str = "https://ntfabirrktssmfpibksk.supabase.co"
-    SUPABASE_KEY: str = "sb_secret_U5AV7Ge-dHjMyPIfj2F57Q_gPkO5Jql"
+    SUPABASE_URL: str
+    SUPABASE_KEY: str
 
     class Config:
         env_file = ".env"
