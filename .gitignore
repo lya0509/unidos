@@ -1,0 +1,12 @@
+# Dependencias y builds
+node_modules/
+dist/
+__pycache__/
+*.pyc
+*.bak
+
+# Credenciales y sesiones
+.env
+.env.*
+!.env.example
+bot/auth_info_baileys/
